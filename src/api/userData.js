@@ -1,4 +1,7 @@
-const userDataEntity = require('../entity/userData')
+const jwt = require('jsonwebtoken');
+const userDataEntity = require('../entity/userData');
+const { checkToken } = require('../helper/autenticateToken');
+const verifyjwt = require('../helper/autenticateToken');
 module.exports = userData = {
     getUserData: async (req, res) => {
         try {
@@ -23,10 +26,16 @@ module.exports = userData = {
             const body = req.body
             // body.id = new mongoose.Types.ObjectId()
             if (typeof body.accountNumber !== 'string' || typeof body.identityNumber !== 'string') {
-                return res.status(400).send({ message: "accountNumber and identityNumber must be string" })
+                return res.status(400).send({ message: "accountNumber and identityNumber must be string" });
             }
-            await userDataEntity.create(body)
-            res.sendStatus(200)
+
+            const checkUser = await userDataEntity.findOne({ identityNumber: body.identityNumber, emailAddress: body.emailAddress });
+            if (checkUser) {
+                return res.status(400).send({ message: "exist data" });
+            }
+
+            await userDataEntity.create(body);
+            res.sendStatus(200);
         } catch (err) {
             res.status(400).json({ message: err.message })
         }
@@ -55,7 +64,7 @@ module.exports = userData = {
             const { id } = req.params;
             const userDataByAccountNumber = await userDataEntity.findOne({ accountNumber: id })
             if (!userDataByAccountNumber) {
-                return res.status(404).send({ message: "cannot find account number" })
+                return res.status(404).send({ message: 'cannot find account number' });
             }
             res.status(200).send(userDataByAccountNumber)
         } catch (err) {
@@ -73,5 +82,26 @@ module.exports = userData = {
         } catch (err) {
             res.status(400).json({ message: err.message })
         }
-    }
+    },
+    postValidateToken: async (req, res) => {
+        try {
+            const body = req.body;
+            const checkDataByIdNumber = await userDataEntity.findOne({ identityNumber: body.identityNumber });
+            if (!checkDataByIdNumber) {
+                return res.status(404).send({ message: "data not found" });
+            }
+
+            const access_token = jwt.sign({
+                emailAddress: body.emailAddress,
+                identityNumber: body.identityNumber,
+            }, process.env.TOKEN_KEY,
+                { expiresIn: '15s' });
+            console.log(access_token)
+
+            res.status(200).send({ access_token });
+
+        } catch (err) {
+            res.status(400).json({ message: err.message })
+        }
+    },
 }
