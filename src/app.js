@@ -25,6 +25,3 @@ mongoose.connect(URL, {
         })
     })
     .catch(err => console.log(err));
-
-
-    // "mongodb+srv://dombalatex:bagaskaramadhan97@bagaskarabetest1.tvmvqzk.mongodb.net/db_bagaskara_betest?retryWrites=true&w=majority"
