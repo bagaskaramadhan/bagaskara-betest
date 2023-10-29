@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
 const userDataEntity = require('../entity/userData');
-const { checkToken } = require('../helper/autenticateToken');
-const verifyjwt = require('../helper/autenticateToken');
 module.exports = userData = {
     getUserData: async (req, res) => {
         try {
@@ -94,8 +92,8 @@ module.exports = userData = {
             const access_token = jwt.sign({
                 emailAddress: body.emailAddress,
                 identityNumber: body.identityNumber,
-            }, process.env.TOKEN_KEY,
-                { expiresIn: '15s' });
+            }, "admin@1234",
+                { expiresIn: '5m' });
             console.log(access_token)
 
             res.status(200).send({ access_token });

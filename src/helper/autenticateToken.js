@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const verifyToken = async (req, res, next) => {
     if (req.headers.authorization) {
         const token = req.headers.authorization.split(' ')[1]
-        jwt.verify(token, process.env.TOKEN_KEY, (err) => {
+        jwt.verify(token, "admin@1234", (err) => {
             if (err) {
                 return res.status(500).send({ message: err.message })
             }
